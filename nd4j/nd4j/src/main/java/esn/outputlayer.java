@@ -22,9 +22,9 @@ public class outputlayer {
         //System.out.println(x2[0][0]);
 
         //出力状態ベクトルの更新
-        for(int k=0; k<1;k++){
-            for(int i=0;i<150;i++){
-                for(int j=0;j<150;j++){   //シグマの役割
+        for(int k=0; k<Ny;k++){
+            for(int i=0;i<Nx;i++){
+                for(int j=0;j<Nx;j++){   //シグマの役割
                     y[i][j] = y[i][j] + wout[i][j][k]*(u[i][j]+x2[i][j]); 
                     //System.out.println(y[i][j]);
                 }

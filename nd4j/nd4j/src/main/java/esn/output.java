@@ -10,7 +10,7 @@ public class output {
         //int[][] h = new int[500][400];
     
         //String inputname = "rena400300.jpg";
-        String outputname = "experiment2.png";
+        String outputname = Thread.currentThread().getContextClassLoader().getResource("experiment2.png").getPath();;
     
             try{ //画像の読み込み
                 //BufferedImage rinImage = ImageIO.read(new File(inputname));

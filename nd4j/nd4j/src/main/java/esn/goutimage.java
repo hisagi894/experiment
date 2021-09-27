@@ -8,8 +8,7 @@ public class goutimage {
     int[][] g = new int[500][400];
     double[][] gd = new double[150][150];
 
-    String inputname = "Lennacolor.jpg";
-
+    String inputname = Thread.currentThread().getContextClassLoader().getResource("Lennacolor.jpg").getPath();;
         try{ //画像の読み込み
             BufferedImage rinImage = ImageIO.read(new File(inputname));
             int inw = rinImage.getWidth();

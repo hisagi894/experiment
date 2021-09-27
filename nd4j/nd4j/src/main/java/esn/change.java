@@ -4,27 +4,32 @@ package esn;
 //import javax.imageio.ImageIO;
 
 public class change {
-        public static int[][] rgb(double[][] r,double[][] g,double[][] b){
-        int[][] rt = new int[500][400];
-        int[][] gt = new int[500][400];
-        int[][] bt = new int[500][400];
-        int[][] ot = new int[500][400];
+        public static int[][] rgb(double[][] r,double[][] g,double[][] b,int Nx,int Nu){
+        int[][] rt = new int[Nu][Nu];
+        int[][] gt = new int[Nu][Nu];
+        int[][] bt = new int[Nu][Nu];
+        int[][] ot = new int[Nu][Nu];
+        int t=0;
         //System.out.println(r[0][0]);
         //System.out.println(g[0][0]);
         //System.out.println(b[0][0]);
             try{ //画像の読み込み
-                for(int y=0;y<150;y++){
-                    for(int x=0;x<150;x++){
-                        r[y][x] = r[y][x]*255;
-                        rt[y][x] = (int)r[y][x];
-                        g[y][x] = g[y][x]*255;
-                        gt[y][x] = (int)g[y][x];
-                        b[y][x] = b[y][x]*255;
-                        bt[y][x] = (int)b[y][x];
-                        ot[y][x] = ImageUtility.rgb(rt[y][x],gt[y][x],bt[y][x]);
-                        //ot[y][x] = ImageUtility.rout(rt[y][x]);
-                        //ot[y][x] = ImageUtility.gout(gt[y][x]);
-                        //ot[y][x] = ImageUtility.bout(bt[y][x]);
+                for(int y=0;y<Nu;y=y+10){
+                    for(int x=0;x<Nu;x=x+10){
+                        while(t>10){
+                            r[y+t][x+t] = r[y+t][x+t]*255;
+                            rt[y+t][x+t] = (int)r[y+t][x+t];
+                            g[y+t][x+t] = g[y+t][x+t]*255;
+                            gt[y+t][x+t] = (int)g[y+t][x+t];
+                            b[y+t][x+t] = b[y+t][x+t]*255;
+                            bt[y+t][x+t] = (int)b[y+t][x+t];
+                            ot[y+t][x+t] = ImageUtility.rgb(rt[y+t][x+t],gt[y+t][x+t],bt[y+t][x+t]);
+                            //ot[y][x] = ImageUtility.rout(rt[y][x]);
+                            //ot[y][x] = ImageUtility.gout(gt[y][x]);
+                            //ot[y][x] = ImageUtility.bout(bt[y][x]);
+                            t++;
+                        }
+                        t=0;
                     }
                 }
                 //System.out.println(rt[0][0]);

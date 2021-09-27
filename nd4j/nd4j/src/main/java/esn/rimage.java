@@ -8,7 +8,7 @@ public class rimage {
     int[][] r = new int[150][150];
     double[][] r2 = new double[150][150];
 
-    String inputname = "lennamono.jpg";   //150*150
+    String inputname = Thread.currentThread().getContextClassLoader().getResource("lennamono.jpg").getPath();   //150*150
 
         try{ //画像の読み込み
             BufferedImage rinImage = ImageIO.read(new File(inputname));
