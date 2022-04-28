@@ -19,7 +19,7 @@ public class boutimage {
                 for(int x=0;x<inh;x++){
                     int in = rinImage.getRGB(y, x);
                     b[y][x] = ImageUtility.b(in);
-                    bd[y][x] = (double)b[y][x]/255.0;
+                    bd[y][x] = (double)b[y][x]/255.0f;
                 }
             }
         } catch(Exception e){

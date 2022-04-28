@@ -21,7 +21,7 @@ public class rimage {
                 for(int x=0;x<inh;x++){
                     int in = rinImage.getRGB(y, x);
                     r[y][x] = ImageUtility.r(in);
-                    r2[y][x] = (double)r[y][x]/255.0;
+                    r2[y][x] = (double)r[y][x]/255.0f;
                 }
             }
         } catch(Exception e){

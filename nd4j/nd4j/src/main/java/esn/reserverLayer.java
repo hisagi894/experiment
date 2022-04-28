@@ -11,8 +11,8 @@ import org.nd4j.linalg.factory.ops.NDMath;
 //import java.util.Random;
 
 public class reserverLayer {
-    public static double[][] Reserver(double[][][] win,double[][] r,double[] wu,double[] wx,double[] wy,double[][][] rx,double[][] x,double[][] xx,double[][] y,double[][][] w,double[][][] wfb,int Nx,int Ny,int count,double emax,double ganma){
-        //int ascale = 1;                         //一様分布の正の範囲
+    public static double[][] Reserver(float[] win,double[][] r,double[] wu,double[] wx,double[] wy,float[][][] rx,double[][] x,double[][] xx,double[][] y,float[][][] w,float[] wfb,int Nx,int Ny,int count,double emax,double ganma){
+        int a = 0;                         //一様分布の正の範囲
         //int bscale = -1;                        //一様分布の負の範囲
         //double max;
         //double row[][] = new double[150][150];
@@ -37,7 +37,7 @@ public class reserverLayer {
             pr = matrix2.toDoubleMatrix();
             //System.out.println(values);
             //System.out.println(pr[0][0]);
-            //pr = values.getDouble(1);
+            //pr = values.getdouble(1);
             //NDMath math = new NDMath();
             double emax=0;
             for(int i=0;i<15;i++){
@@ -50,7 +50,7 @@ public class reserverLayer {
                     if(pr[i][j]<1.0){
                         if(emax < pr[i][j]){
                             emax = pr[i][j];
-                            //pr = element.getDouble(1,1);
+                            //pr = element.getdouble(1,1);
                         }
                     }
             //if(element[1]{1,1} <= 1)
@@ -67,7 +67,7 @@ public class reserverLayer {
                 values2 = values4;
             }*?
          
-            double[] c = values2.toDoubleVector();                             //行列を配列に変換
+            double[] c = values2.todoubleVector();                             //行列を配列に変換
             double ganma = c[0];
             System.out.println(ganma);
 
@@ -85,21 +85,21 @@ public class reserverLayer {
             //values = math.amax(values);                      //固有値の最大値
             //System.out.println(values);
             //INDArray scale1 = values;
-            //double[][] cscale = values.toDoubleMatrix();     //行列を配列に変換
+            //double[][] cscale = values.todoubleMatrix();     //行列を配列に変換
             //System.out.println(cscale);
             //values = values.mul(-1);                         //一様分布の正の範囲
             //INDArray scale2 = values;                        //一様分布の負の範囲
-            //double[][] dscale = scale2.toDoubleMatrix();     //行列を配列に変換
+            //double[][] dscale = scale2.todoubleMatrix();     //行列を配列に変換
             //INDArray scale3 = scale2.sub(scale1);
             //scale3 = scale3.add(scale3);
 
             //wのスケーリング
-            ganma = 0.1;
+            ganma = 0.5f;
             for(int i=0; i<Nx;i++){
                 for(int j=0;j<Nx;j++){
                     for(int k=0;k<Ny;k++){
                         //入力層の重みの初期値
-                        w[i][j][k] = w[i][j][k]*ganma;
+                        w[i][j][k] = w[i][j][k]*(float)ganma;
                         //System.out.println("縦"+i+"横"+j+"の乱数"+rand[i][j]);
                     }
                 }
@@ -109,7 +109,7 @@ public class reserverLayer {
 
         /*//リカレント結合重みの生成（ランダムグラフ）
         Random rand = new Random();
-        double randvalue = rand.nextDouble();
+        double randvalue = rand.nextdouble();
         for(int i=0; i<Nx1;i++){
             for(int j=0;j<Nx2;j++){
                 if(randvalue>0.05)
@@ -126,53 +126,56 @@ public class reserverLayer {
         //System.out.println(w[0][0]);
         //System.out.println(x[0][0]);
 
+        for(a=0;a<Ny;a++){
+            wu[a] = 0;
+            wx[a] = 0;
+            wy[a] = 0;
+        }
+
         //Win*u
-        for(int k=0; k<Ny;k++){
-            wu[k] = 0;
+        a=0;
             for(int i=0;i<Nx;i++){
                 for(int j=0;j<Nx;j++){   //シグマの役割
-                    wu[k] = wu[k] + win[i][j][k]*r[i*10][j*10];
+                    wu[a] = wu[a] + win[a]*r[i][j]; //r[150][150]]
+                    a++;
                 }
             }
             //System.out.println(wu[k]); 
-        }
         //System.out.println(wu[0]); 
 
-        //W*x
-        for(int k=0; k<Ny;k++){
-            wx[k] = 0;
+        //W*x    
+        a=0;
             for(int i=0;i<Nx;i++){
                 for(int j=0;j<Nx;j++){   //シグマの役割
-                    wx[k] = wx[k] + w[i][j][k]*x[i][j];
+                    wx[a] = wx[a] + w[i][j][a]*x[i][j];
+                    a++;
                     //System.out.println(Win[i][j]); 
                 }
             }
-        }
-        System.out.println(wx[0]); 
+        //System.out.println(wx[0]); 
 
         //Win*y
-        for(int k=0; k<Ny;k++){
-            wy[k] = 0;
+        a=0;
             for(int i=0;i<Nx;i++){
                 for(int j=0;j<Nx;j++){   //シグマの役割
-                    wy[k] = wy[k] + wfb[i][j][k]*y[i][j];
+                    wy[a] = wy[a] + wfb[a]*y[i][j];
+                    a++;
                     //System.out.println(Win[i][j]); 
                 }
             }
-        }
         //System.out.println(wy[0]); 
 
-        int k=0;
         //リザバー状態ベクトルの更新
+        int b = 0;
         for(int i=0; i<Nx;i++){
             for(int j=0;j<Nx;j++){
                 //if(rx[i][j][k] != 0)
-                xx[i][j] = Math.tanh(wu[k] + wx[k] + wy[k]);
+                xx[i][j] = Math.tanh(wu[b] + wx[b] + wy[b]);
                 //xx[i][j] = Math.tanh(wu[i][j] + w[i][j][k]*x[i][j]+wfb[i][j][k]*y[i][j]);
                 //x2[i][j] = Math.tanh(xu[i][j] + w[i][j]*x[i][j] + wfb[i][j]*y[i][j]);
                 //System.out.println(p[i][j]);
                 //System.out.println(xx[i][j]);
-                k++;
+                b++;
             }
         }
         //System.out.println(xx[0][0]); 

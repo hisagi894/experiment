@@ -18,7 +18,7 @@ public class goutimage {
                 for(int x=0;x<inh;x++){
                     int in = rinImage.getRGB(y, x);
                     g[y][x] = ImageUtility.g(in);
-                    gd[y][x] = (double)g[y][x]/255.0;
+                    gd[y][x] = (double)g[y][x]/255.0f;
                 }
             }
         } catch(Exception e){

@@ -1,221 +1,181 @@
 package esn;
+
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
+
+//import org.nd4j.linalg.api.ndarray.INDArray;
+
 public class ESNMain {
     public static void main(String[] args){
-        int i=0;
-        int T=100;
-        double elms = 0;
-        double ganma = 0;
-        double it = 0.5;
-        double maxeigen=0;
-        int Nu = 150;                             //入力層のノード数
-        int Nx = 15;                             //リザバー層のノード数
-        int Ny = 225;                             //出力層のノード数
-        double[][] r = new double[Nu][Nu];              //rニューロン
-        double[][] g = new double[Nu][Nu];              //gニューロン
-        double[][] b = new double[Nu][Nu];              //bニューロン
-        double[][] dr = new double[Nu][Nu];             //drニューロン
-        double[][] dg = new double[Nu][Nu];             //dgニューロン
-        double[][] db = new double[Nu][Nu];             //dbニューロン
-        //double[][] rer = new double[Nx][Nx];        //リザバー状態ベクトル
-        //double[][] reg = new double[Nx][Nx];        //リザバー状態ベクトル
-        //double[][] reb = new double[Nx][Nx];        //リザバー状態ベクトル
-        double[][][] rx = new double[Nx][Nx][Ny];     //リザバー状態ベクトル
-        double[][] xr = new double[Nx][Nx];        //リザバー状態ベクトル 
-        double[][] xg = new double[Nx][Nx];        //リザバー状態ベクトル 
-        double[][] xb = new double[Nx][Nx];        //リザバー状態ベクトル  
-        double[][] x2 = new double[Nx][Nx];         //リザバー状態ベクトル 
-        //double[][] y = new double[Nx][Ny];          //正規分布の乱数   
-        double[][] e = new double[Nx][Nx];
-        double[][][] wout = new double[Nx][Nx][Ny];
-        double[][][] Win = new double[Nx][Nx][Ny];      //入力重み
-        double[][][] W = new double[Nx][Nx][Ny];        //リザバー重み
-        double[][][] Wout = new double[Nx][Nx][Ny];    //出力重み
-        double[][][] Wfb = new double[Nx][Nx][Ny];      //フィードバック重み
-        double[] Wu = new double[Ny];       //wu(r)
-        //double[][][] wg = new double[Nx][Nx][22500];       //wu(g)
-        //double[][][] wb = new double[Nx][Nx][22500];       //wu(b)
-        double[] wrx = new double[Ny];       //wx(r)
-        double[] wgx = new double[Ny];       //wx(b)
-        double[] wbx = new double[Ny];       //wx(b)
-        double[] wy = new double[Ny];       //wx(b)
-        double[][] wrwx= new double[Nx][Nx];      //xr
-        double[][] wgwx= new double[Nx][Nx];      //xg
-        double[][] wbwx= new double[Nx][Nx];      //xb
-        double[][] yr = new double[Nx][Nx];       //yr
-        double[][] yg = new double[Nx][Nx];       //yg
-        double[][] yb = new double[Nx][Nx];       //yb
-        double[][][] Lmsr = new double[Nx][Nx][Ny];     //Wout(r)
-        double[][][] Lmsg = new double[Nx][Nx][Ny];     //Wout(g)
-        double[][][] Lmsb = new double[Nx][Nx][Ny];     //Wout(b)
-        int[][] rgb = new int[Nu][Nu];            //Wout(b)
-        //double[][] pr = new double[15][10];
+        //線形回帰(XOR)
+        int i=2,j=0;
+        int T=50;
+        float density = 0.1f;
+        float rho = 0.9f;
+        int Nu = 50;                             //入力層のノード数
+        int Nx = 20;                             //リザバー層のノード数
+        int Ny = 50;
+        int ud = 1;
+        int yd = 1;
+        int[][] u =  new int[1][Nu];
+        int[][] b =  new int[1][Nu];
+        int[][] ru =  new int[Nu][1];
+        int[][] rb =  new int[Nu][1];
+        float[][] tmpu =  new float[ud][ud];
+        int[][] d =  new int[1][Ny];
+        int[][] s =  new int[1][Ny];
+        int[][] rd =  new int[Ny][1];
+        float[][] tmpd =  new float[yd][yd];
+        float[][] W = new float[Nx][Nx];     //リザバー状態ベクトル
+        float[] x = new float[Nx];         //リザバー状態ベクトル
+        float[] y = new float[Ny];        //y[1][50]
+        float[] result = new float[Ny];        //y[1][50]
+        float[][] Win = new float[Nx][ud];      //入力重み[y次元][出力データ]
+        float[][] Wout = new float[yd][Nx];     //出力重み[y次元][出力データ]
+        float[][] xxt = new float[Nx][Nx];    //出力重み
+        float[][] dxt = new float[yd][Nx];    //出力重み
+        float[] Wu = new float[Nx];
+        int prrnd = 2;
+        int ternd = 1;
 
-        //入力データの呼び出し
-        r = rimage.red();
-        g = gimage.green();
-        b = bimage.blue();
-        //System.out.println(r[0][0]);
-        //System.out.println(g[0][0]);
-        //System.out.println(b[0][0]);
+        //線形回帰(XOR)
+        u = batch.input(Nu,prrnd);  //入力データ50 u[1][50]
+        d = batch.output(Nu,Ny,prrnd); //出力データ50 d[1][48]
 
-        //出力データの呼び出し
-        dr = routimage.outred();
-        dg = goutimage.outgreen();
-        db = boutimage.outblue();
-        //System.out.println(dr[0][0]);
-        //System.out.println(dg[0][0]);
-        //System.out.println(db[0][0]);
-
+        //入出力を[50][1]の型変換(reshape)
+        INDArray t_u = Nd4j.create(u);      //t_u[1][50]
+        INDArray t_ut = t_u.transpose();    //t_ut[50][1]
+        //System.out.println(t_ut);
+        ru = t_ut.toIntMatrix();            //ru[50][1]
+        INDArray t_d = Nd4j.create(d);      //t_d[1][48]
+        INDArray t_dt = t_d.transpose();    //t_dt[48][1]
+        //System.out.println(t_dt);
+        rd = t_dt.toIntMatrix();            //rd[48][1]
         //リザバー状態ベクトルの設定
-        rx = revec.Revec(rx,Nx,Ny);
-        //xr = x;
-        //xg = x;
-        //xb = x;
-        //System.out.println(x[0][0]);
-        //System.out.println(x[0][1]);
-        //System.out.println(x[0][2]);
-
-        //Winの重みの計算
-        Win = win.wscale(0.5,-0.5,Nx,Ny);
-        W = win.wscale(1,-1,Nx,Ny);
-        Wout = win.wscale(0,0,Nx,Ny);
-        Wfb = win.wscale(0.8,-0.8,Nx,Ny);
-        //System.out.println(Win[0][0]);
-        //System.out.println(W[0][0]);
-        //System.out.println(Wout[0][0]);
-        //System.out.println(Wfb[0][0]);
-
-        //Woutの重みの計算
-        Lmsr = Wout;
-        Lmsg = Wout;
-        Lmsb = Wout;
-        //System.out.println(Lmsr[0][0]);
-        //System.out.println(Lmsg[0][0]);
-        //System.out.println(Lmsb[0][0]);
-
-        //スペクトル半径
-        //maxeigen = rou.spectrum(W,pr);
-        maxeigen =0.9;
-
-        for(int v=0; v<Nx;v++){
-            for(int j=0;j<Nx;j++){
-                //入力層の重みの初期値
-                yr[v][j] = 0;
-                yg[v][j] = 0;
-                yb[v][j] = 0;
-                xr[v][j] = 0.5;
-                xg[v][j] = 0.5;
-                xb[v][j] = 0.5;
-                //System.out.println("縦"+i+"横"+j+"の乱数"+rand[i][j]);
-            }
-        }
+        W = connect.Reve(Nx,density,rho);  //W[20][20]
+        //INDArray rx2 = Nd4j.create(W);
+        //System.out.println(rx2);
+        //重みの計算
+        Win = node.wnode(-1.0f,1.0f,Nx,ud); //Win[20][1]
+        //INDArray rx2 = Nd4j.create(Win);
+        //System.out.println(rx2);
+        Wout = batchout.output(Nx,yd);      //Wout[1][20]
+        //INDArray rx2 = Nd4j.create(Win);
+        //System.out.println(rx2);
 
         while(i<T){
-            //rgb入力層の計算
-            //wr = inputlayer.rlayer(Win,r,Nu,Nx,wr);
-            //wg = inputlayer.rlayer(Win,g,Nu,Nx,wg);
-            //wb = inputlayer.rlayer(Win,b,Nu,Nx,wb);
-            //System.out.println(wr[0][0]);
-            //System.out.println(wg[0][0]);
-            //System.out.println(wb[0][0]);
-
-            //入力データとリザバー結合重みを送ってリザバー結合重みを得る
-            if(i==0){
-                //スペクトル半径
-                //maxeigen = rou.spectrum(W,pr);
-                wrwx = reserverLayer.Reserver(Win,r,Wu,wrx,wy,rx,xr,x2,yr,W,Wfb,Nx,Ny,0,maxeigen,ganma);
-                wgwx = reserverLayer.Reserver(Win,g,Wu,wgx,wy,rx,xg,x2,yg,W,Wfb,Nx,Ny,0,maxeigen,ganma);
-                wbwx = reserverLayer.Reserver(Win,b,Wu,wbx,wy,rx,xb,x2,yb,W,Wfb,Nx,Ny,0,maxeigen,ganma);
-                xr=wrwx;
-                xg=wgwx;
-                xb=wbwx;
-                //System.out.println(xr[0][0]);
-                //System.out.println(xg[0][0]);
-                //System.out.println(xb[0][0]);
-                //System.out.println(maxeigen);
-            }
-            else{
-                //スペクトル半径
-                //maxeigen = rou.spectrum(W,pr);
-                wrwx = reserverLayer.Reserver(Win,r,Wu,wrx,wy,rx,xr,x2,yr,W,Wfb,Nx,Ny,i,maxeigen,ganma);
-                wgwx = reserverLayer.Reserver(Win,g,Wu,wgx,wy,rx,xg,x2,yg,W,Wfb,Nx,Ny,i,maxeigen,ganma);
-                wbwx = reserverLayer.Reserver(Win,b,Wu,wbx,wy,rx,xb,x2,yb,W,Wfb,Nx,Ny,i,maxeigen,ganma);
-                xr=wrwx;
-                xg=wgwx;
-                xb=wbwx;
-                //System.out.println(xr[0][0]);
-                //System.out.println(maxeigen);
-            }
-
-            //System.out.println(wrwx[0][0]);
-
-            //リザバー結合重みを送って、出力結果を得る
-            yr = outputlayer.outlayer(r,yr,wrwx,Nx,Ny,Lmsr);
-            yg = outputlayer.outlayer(g,yg,wgwx,Nx,Ny,Lmsg);
-            yb = outputlayer.outlayer(b,yb,wbwx,Nx,Ny,Lmsb);
-            //System.out.println(yr[0][0]);
-            //System.out.println(yg[0][0]);
-            //System.out.println(yb[0][0]);
+            tmpu[0][0]=(float)ru[i][0];   //tmpu[0]←ru[0~49][0]
+            tmpd[0][0]=(float)rd[i][0];   //tmpd[0]←rd[0~47][0]
+            //System.out.println(tmpu[0]);
+            //System.out.println(tmpd[0]);
+            //Wu = node.wu(Win,ru,Nx,Nu);
+            Wu = node.wu(Win,tmpu,Nx,ud);           //Wu[20]←Win[20][1],tmpu[1],Nx=20,ud=1
+            //INDArray ex = Nd4j.create(Wu);
+            //System.out.println(ex);
+            //System.out.println(XXT);
+            x = reseupdate.update(Wu,Nx,W,x,i);    //x[20]←Wu[20],Nx=20,rx[20][20],x[20],i
+            //System.out.println(Wu);
+            xxt = moorepen.xxt(x,xxt,Nx);           //xxt[20][20]←x[20],xxt[20][20],Nx=20
+            //INDArray XXT = Nd4j.create(xxt);
+            //System.out.println(XXT);
+            //dxt = moorepen.dxt(rd,x,dxt,Nx,Ny);
+            dxt = moorepen.dxt(tmpd,x,dxt,Nx,Ny);   //dxt[1][20]←tmpd[1],x[20],dxt[1][20],Nx=20,Ny=50
+            //INDArray DXT = Nd4j.create(dxt);
+            //System.out.println("DXT"+DXT);
+            //System.out.println(xxt[0][0]);
+            //INDArray rex = Nd4j.create(xxt);
+            //System.out.println(rex);
+            //INDArray dex = Nd4j.create(dxt);
+            //System.out.println(dex);
+            //System.out.println(dxt[0][0]);
+            y[i] = batchout.woutx(Wout,x,Nx,yd);       //y[1][20]←Wout[1][20],x[20],Nx=20,yd=1
+            //System.out.println(y[0][0]);
+            tmpu[0][0]=0;
+            tmpd[0][0]=0;
             i++;
-
-            //LMS法
-            Lmsr = lms.Elms(yr,dr,wout,e,Lmsr,wrwx,elms,it,Nx,Ny);
-            Lmsg = lms.Elms(yg,dg,wout,e,Lmsg,wgwx,elms,it,Nx,Ny);
-            Lmsb = lms.Elms(yb,db,wout,e,Lmsb,wbwx,elms,it,Nx,Ny);
-            //System.out.println(yr[0][0]);
-            //System.out.println(yg[0][0]);
-            //System.out.println(yb[0][0]);
-            //System.out.println("wout"+Lmsr[0][0]);
-
-            //r = yr;
-            //g = yg;
-            //b = yb;
         }
 
-        //System.out.println(Wout[0][0]);
-        //System.out.println(Lmsr[0][0]);
-        //System.out.println(Lmsg[0][0]);
-        //System.out.println(Lmsb[0][0]);
-        //System.out.println(r[0][0]);
-        //System.out.println(g[0][0]);
-        //System.out.println(b[0][0]);
-        //System.out.println(dr[0][0]);
-        //System.out.println(dg[0][0]);
-        //System.out.println(db[0][0]);
+        //INDArray rey = Nd4j.create(y);
+        //System.out.println(rey);
 
-        //System.out.println(yr[0][0]);
-        //System.out.println(yg[0][0]);
-        //System.out.println(yb[0][0]);
+        for(i=0;i<Nx;i++){
+            for(j=0;j<Nx;j++){
+                //System.out.println(xxt[i][j]);
+            }
+        }
+        for(i=0;i<Ny;i++){
+            for(j=0;j<Nx;j++){
+                //System.out.println(dxt[i][j]);
+            }
+        }
 
 
-        //画像出力
-        rgb = change.rgb(yr,yg,yb,Nx,Nu);
-        //System.out.println(rgb[0][0]);
-        //System.out.println(rgb[0][1]);
-        //System.out.println(rgb[0][2]);
-        //System.out.println(Integer.toHexString(rgb[0][0]));
+        Wout = moorepen.mp(xxt,dxt,Nx,yd);
 
-        //画像出力
-        output.routput(rgb);
-        //output.routput(rgb);
-        //output.routput(rgb);
-        
-        //System.out.println("yr="+yr[0][0]);
-        //System.out.println("yg="+yg[0][0]);
-        //System.out.println("yb="+yb[0][0]);
+        for(i=0;i<Nx;i++){
+            Wu[i]=0;
+        }
+        for(i=0;i<Nx;i++){
+            x[i]=0;
+        }
+        for(j=0;j<Nx;j++){
+            y[j]=0;
+        }
 
-        //System.out.println("Lmsr="+Lmsr[0][0]);
-        //System.out.println("Lmsg="+Lmsg[0][0]);
-        //System.out.println("Lmsb="+Lmsb[0][0]);
+        for(i=0;i<Nx;i++){
+            //System.out.println(Wout[6][i]);
+        }
 
-        //線形回帰
-        //linear.linear1(data3);
+        i=0;
 
-        //予測性能の評価
-        //rmse.prediction(yr,dr);
-        //rmse.prediction(yg,dg);
-        //rmse.prediction(yb,db);
-        //System.out.println(data2[0][0]);
+        while(i<T){
+            tmpu[0][0]=(float)ru[i][0];
+            //Wu = node.wu(Win,ru,Nx,Nu);
+            Wu = node.wu(Win,tmpu,Nx,ud);
+            x = reseupdate.update(Wu,Nx,W,x,i);
+            //System.out.println(Wout[0][0]);
+            //System.out.println(x[0][0]);
+            y[i] = batchout.woutx(Wout,x,Nx,yd);
+            if(y[i]<0.5){
+                result[i] = 0;
+            }
+            else{
+                result[i] = 1;
+            }
+            //System.out.println(y[i][0]);
+            tmpu[0][0]=0;
+            i++;
+        }
+
+        INDArray rex = Nd4j.create(d);
+        System.out.println(rex);
+
+        //INDArray rew = Nd4j.create(Wout);
+        //System.out.println(rew);
+
+        //INDArray rey2 = Nd4j.create(y);
+        //System.out.println(rey2);
+
+        INDArray rey2 = Nd4j.create(result);
+        System.out.println(rey2);
+
+        for(i=0;i<Nx;i++){
+            //System.out.println(x[i][0]);
+        }
+
+        for(i=0;i<Nu;i++){
+            for(j=0;j<Nx;j++){
+                //System.out.println(Wout[i][j]);
+            }
+        }
+
+        for(i=0;i<Ny;i++){
+            //System.out.println(ru[i][0]);
+        }
+
+        for(i=0;i<Ny;i++){
+            //System.out.println(y[i][0]);
+        }
 
     }
 }

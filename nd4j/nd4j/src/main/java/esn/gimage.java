@@ -19,7 +19,7 @@ public class gimage {
                 for(int x=0;x<inh;x++){
                     int in = rinImage.getRGB(y, x);
                     g[y][x] = ImageUtility.g(in);
-                    g2[y][x] = (double)g[y][x]/255.0;
+                    g2[y][x] = (double)g[y][x]/255.0f;
                 }
             }
         } catch(Exception e){
